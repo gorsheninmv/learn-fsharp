@@ -9,7 +9,7 @@ let expectedOutput = 500_000_500_000UL
 
 [<Test>]
 let ``sumOf with accumulator should return valid sum`` () =
-    input |> factorial |> should equal expectedOutput
+    input |> sum |> should equal expectedOutput
 
 [<Test>]
 let ``sumOf with cps should return valid sum`` () =
@@ -18,4 +18,4 @@ let ``sumOf with cps should return valid sum`` () =
 [<Test>]
 [<Ignore("stackoverflow")>]
 let ``recursive sumOf should return valid sum`` () =
-    input |> plainFactorial |> should equal expectedOutput
+    input |> plainSum |> should equal expectedOutput

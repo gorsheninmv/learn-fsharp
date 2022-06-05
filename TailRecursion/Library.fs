@@ -46,23 +46,23 @@ module QuickSort =
             left @ (first :: right)
 
 [<AutoOpen>]
-module Factorial =
+module Sums =
 
-    let rec plainFactorial n: uint64 =
+    let rec plainSum n =
         match n with
         | 0UL -> 0UL
-        | _ -> n + plainFactorial (n-1UL)
+        | _ -> n + plainSum (n-1UL)
 
-    let factorial n: uint64 =
-        let rec factorialInternal (n: uint64) (acc: uint64) =
+    let sum n =
+        let rec sumInternal n acc =
             match n with
             | 0UL -> acc
-            | _ -> factorialInternal (n-1UL) (n + acc)
+            | _ -> sumInternal (n-1UL) (n + acc)
 
-        factorialInternal n 0UL
+        sumInternal n 0UL
 
     let sumOf n =
-        let rec sumOfInternal (n: uint64) cont =
+        let rec sumOfInternal n cont =
             match n with
             | 0UL -> cont 0UL
             | _ -> sumOfInternal (n-1UL) (fun x -> cont (x + n))
