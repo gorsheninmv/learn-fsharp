@@ -58,8 +58,6 @@ module Implementation =
 
     Node (insertInternal tree value)
 
-open Implementation
-
 module Tests =
 
   open NUnit.Framework
