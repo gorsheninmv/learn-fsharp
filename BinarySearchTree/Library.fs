@@ -143,8 +143,6 @@ module Tests =
     let tree = Node { leaf with value = 42 }
     (fun () -> insert 42 tree |> ignore) |> should throw typeof<System.Exception>
 
-  let a = [|42; 10|]
-
   [<TestCase([| 42; 10; 60; 50; 70; 90 |])>]
   [<TestCase([| 42; 60; 70 |])>]
   let ``if diff more than 2 balance required`` valuesToInsert =
