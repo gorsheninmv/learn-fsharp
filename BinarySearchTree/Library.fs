@@ -118,6 +118,7 @@ module Tests =
     | Node node -> node.height |> should equal 2
 
   [<Test>]
+  // TODO: Union to TestCase
   let ``bst height should be valid 2`` () =
     let tree = Empty |> insert 42 |> insert 60
     match tree with
