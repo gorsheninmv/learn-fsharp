@@ -74,6 +74,9 @@ module Tests =
   let isSameTrees first second =
     LanguagePrimitives.PhysicalEquality first second
 
+  let fillTree values =
+    Array.fold (fun tree value -> insert value tree) Empty values
+
   [<Test>]
   let ``empty tree is bst`` () =
     let tree = Empty
@@ -110,30 +113,23 @@ module Tests =
     }
     tree |> isBst |> should equal true
 
-  [<Test>]
-  let ``bst height should be valid`` () =
-    let tree = Empty |> insert 42 |> insert 10 |> insert 60 |> insert 50 |> insert 70
+  [<TestCase([| 42; 10; 60; 50; 70 |], 2)>]
+  [<TestCase([| 42; 60 |], 1)>]
+  let ``bst height should be valid`` values treeHeight =
+    let tree = fillTree values
     match tree with
     | Empty -> failwith "tree should be node"
-    | Node node -> node.height |> should equal 2
-
-  [<Test>]
-  // TODO: Union to TestCase
-  let ``bst height should be valid 2`` () =
-    let tree = Empty |> insert 42 |> insert 60
-    match tree with
-    | Empty -> failwith "tree should be node"
-    | Node node -> node.height |> should equal 1
+    | Node node -> node.height |> should equal treeHeight
 
   [<Test>]
   let ``insert yields new tree`` () =
-    let tree = Empty |> insert 42 |> insert 10 |> insert 60 |> insert 50
+    let tree = fillTree [| 42; 10; 60; 50 |]
     let updatedTree = tree |> insert 70
     isSameTrees tree updatedTree |> should equal false
 
   [<Test>]
   let ``insert yields the same sub tree`` () =
-    let tree = Empty |> insert 42 |> insert 10 |> insert 60 |> insert 50
+    let tree = fillTree [| 42; 10; 60; 50 |]
     let updatedTree = tree |> insert 70
     match tree, updatedTree with
     | Node node, Node updatedNode -> isSameTrees node.left updatedNode.left |> should equal true
@@ -147,5 +143,4 @@ module Tests =
   [<TestCase([| 42; 10; 60; 50; 70; 90 |])>]
   [<TestCase([| 42; 60; 70 |])>]
   let ``if diff more than 2 balance required`` valuesToInsert =
-    let fillTree = Array.fold (fun tree value -> insert value tree) Empty
     (fun () -> fillTree valuesToInsert |> ignore) |> should (throwWithMessage "balance required") typeof<System.Exception>
