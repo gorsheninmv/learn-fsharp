@@ -35,6 +35,14 @@ module Implementation =
       | Empty -> -1
       | Node node -> node.height
 
+    let treeHeightDiff tree =
+      match tree with
+      | Empty -> 0
+      | Node node -> (height node.left) - (height node.right)
+
+    let nodeHeightDiff node =
+      (height node.left) - (height node.right)
+
     let ll node =
       let y =
         match node.left with
@@ -46,12 +54,26 @@ module Implementation =
       let x = Node { node with left = b; right = c; height = 1 + max (height b) (height c) }
       { y with left = a; right = x; height = 1 + max (height a) (height x) }
 
+    let rr node =
+      let y =
+        match node.right with
+        | Node node -> node
+        | Empty -> failwith "unexpected type"
+      let a = node.left
+      let b = y.left
+      let c = y.right
+      let x = Node { node with left = a; right = b; height = 1 + max (height a) (height b) }
+      { y with left = x; right = c; height = 1 + max (height x) (height c) }
+
     let balance node =
-      let lh = height node.left
-      let rh = height node.right
-      let diff = abs (lh - rh)
+      let diff = nodeHeightDiff node
       match diff with
-      | diff when diff < 2 -> node
+      | -2 when (treeHeightDiff node.left) < (treeHeightDiff node.right) -> rr node
+      | -2 when (treeHeightDiff node.left) > (treeHeightDiff node.right) -> failwith "todo" // ll + rr
+      | -2 -> failwith "unexpected case"
+      | 2 when (treeHeightDiff node.left) > (treeHeightDiff node.right) -> ll node
+      | 2 when (treeHeightDiff node.left) > (treeHeightDiff node.right) -> failwith "todo" // rr + ll ???
+      | 2 -> failwith "unexpected case"
       | _ -> ll node
 
     let rec insertInternal tree value =
