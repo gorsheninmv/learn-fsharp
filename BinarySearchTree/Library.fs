@@ -2,6 +2,8 @@
 
 module Implementation =
 
+  open Common
+
   type Node<'a> = {
     value: 'a
     left: Tree<'a>
@@ -47,7 +49,7 @@ module Implementation =
       let y =
         match node.left with
         | Node node -> node
-        | Empty -> failwith "unexpected type"
+        | Empty -> raise InvalidCaseException
       let a = y.left
       let b = y.right
       let c = node.right
@@ -58,7 +60,7 @@ module Implementation =
       let y =
         match node.right with
         | Node node -> node
-        | Empty -> failwith "unexpected type"
+        | Empty -> raise InvalidCaseException
       let a = node.left
       let b = y.left
       let c = y.right
@@ -69,7 +71,7 @@ module Implementation =
       let y =
         match node.right with
         | Node node -> node
-        | Empty -> failwith "unexpected type"
+        | Empty -> raise InvalidCaseException
       let y = ll y
       let node = { node with right = Node y }
       rr node
@@ -78,7 +80,7 @@ module Implementation =
       let y =
         match node.left with
         | Node node -> node
-        | Empty -> failwith "unexpected type"
+        | Empty -> raise InvalidCaseException
       let y = rr y
       let node = { node with left = Node y }
       ll node
@@ -88,11 +90,11 @@ module Implementation =
       match diff with
       | -2 when (treeHeightDiff node.right) = -1 -> rr node
       | -2 when (treeHeightDiff node.right) = 1 -> rl node
-      | -2 -> failwith "unexpected case"
+      | -2 -> raise InvalidCaseException
       | 2 when (treeHeightDiff node.left) = 1 -> ll node
       | 2 when (treeHeightDiff node.left) = -1 -> lr node
-      | 2 -> failwith "unexpected case"
-      | diff when (abs diff) > 2 -> failwith "unexpected case"
+      | 2 -> raise InvalidCaseException
+      | diff when (abs diff) > 2 -> raise InvalidCaseException
       | _ -> node
 
     let rec insertInternal tree value =
@@ -106,14 +108,31 @@ module Implementation =
           | node when value > node.value ->
             let right = Node (insertInternal node.right value)
             balance { node with right = right; height = 1 + max (height right) (height node.right) }
-          | _ -> failwith $"unexpected value of value = {value}"
+          | _ -> raise (InvalidCaseExceptionWithMessage $"unexpected value = {value}")
 
     Node (insertInternal tree value)
+
+  let rec find value tree =
+   match tree with
+   | Empty -> Empty
+   | Node node ->
+     match node with
+     | node when value < node.value -> find value node.left
+     | node when value > node.value -> find value node.right
+     | _ -> Node node
+
+  let remove value tree =
+    let nodeToRemove = find value tree
+    match nodeToRemove with
+    | Empty -> tree
+    | Node node -> Node node
 
 module Tests =
 
   open NUnit.Framework
   open FsUnit
+  open Common
+  open Tests.Common
   open Implementation
 
   let leaf = {
@@ -170,7 +189,7 @@ module Tests =
   let ``bst height should be valid`` values treeHeight =
     let tree = fillTree values
     match tree with
-    | Empty -> failwith "tree should be node"
+    | Empty -> raise InvalidCaseException
     | Node node -> node.height |> should equal treeHeight
 
   [<Test>]
@@ -185,12 +204,12 @@ module Tests =
     let updatedTree = tree |> insert 70
     match tree, updatedTree with
     | Node node, Node updatedNode -> isSameTrees node.left updatedNode.left |> should equal true
-    | _ -> failwith "both trees should be nodes"
+    | _ -> raise InvalidCaseException
 
   [<Test>]
   let ``insert existed value throws error`` () =
     let tree = Node { leaf with value = 42 }
-    (fun () -> insert 42 tree |> ignore) |> should throw typeof<System.Exception>
+    (fun () -> insert 42 tree |> ignore) |> should throw typeof<InvalidCaseExceptionWithMessage>
 
   [<Test>]
   let ``ll check`` () =
@@ -245,6 +264,20 @@ module Tests =
       height = 2
     }
     tree |> should equal expectedTree
+
+  [<Test>]
+  let ``node found if value exists`` () =
+    let tree = fillTree [| 10; 5; 15; 4; 6; 14; 16 |]
+    let tree = find 4 tree
+    Assert.Multiple (fun () ->
+      tree |> should be (ofCase<@ Tree<int>.Node @>)
+      tree |> getInnerValue :?> Node<int> |> fun node -> node.value |> should equal 4)
+
+  [<Test>]
+  let ``node not found if value does not exist`` () =
+    let tree = fillTree [| 10; 5; 15; 4; 6; 14; 16 |]
+    let tree2 = find 42 tree
+    tree2 |> should be (ofCase<@ Tree<int>.Empty @>)
 
   [<Test>]
   let ``how immutability works`` () =

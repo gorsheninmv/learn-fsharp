@@ -8,6 +8,10 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BinarySearchTree", "BinaryS
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Pipeline", "Pipeline\Pipeline.fsproj", "{C78EDA0E-F7F0-4BA5-BBDE-6C67C030FB2A}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Tests.Common", "Tests.Common\Tests.Common.fsproj", "{3360364D-A620-4ADA-A43D-3BD255005C59}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Common", "Common\Common.fsproj", "{46D0CCD9-7CA9-4948-81B3-BE5C89585DD7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +34,13 @@ Global
 		{C78EDA0E-F7F0-4BA5-BBDE-6C67C030FB2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C78EDA0E-F7F0-4BA5-BBDE-6C67C030FB2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C78EDA0E-F7F0-4BA5-BBDE-6C67C030FB2A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3360364D-A620-4ADA-A43D-3BD255005C59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3360364D-A620-4ADA-A43D-3BD255005C59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3360364D-A620-4ADA-A43D-3BD255005C59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3360364D-A620-4ADA-A43D-3BD255005C59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46D0CCD9-7CA9-4948-81B3-BE5C89585DD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46D0CCD9-7CA9-4948-81B3-BE5C89585DD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46D0CCD9-7CA9-4948-81B3-BE5C89585DD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46D0CCD9-7CA9-4948-81B3-BE5C89585DD7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
