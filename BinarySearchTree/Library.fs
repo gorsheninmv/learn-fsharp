@@ -35,13 +35,13 @@ module Implementation =
       | Empty -> -1
       | Node node -> node.height
 
+    let nodeHeightDiff node =
+      (height node.left) - (height node.right)
+
     let treeHeightDiff tree =
       match tree with
       | Empty -> 0
-      | Node node -> (height node.left) - (height node.right)
-
-    let nodeHeightDiff node =
-      (height node.left) - (height node.right)
+      | Node node -> nodeHeightDiff node
 
     let ll node =
       let y =
@@ -65,16 +65,35 @@ module Implementation =
       let x = Node { node with left = a; right = b; height = 1 + max (height a) (height b) }
       { y with left = x; right = c; height = 1 + max (height x) (height c) }
 
+    let rl node =
+      let y =
+        match node.right with
+        | Node node -> node
+        | Empty -> failwith "unexpected type"
+      let y = ll y
+      let node = { node with right = Node y }
+      rr node
+
+    let lr node: Node<'a> =
+      let y =
+        match node.left with
+        | Node node -> node
+        | Empty -> failwith "unexpected type"
+      let y = rr y
+      let node = { node with left = Node y }
+      ll node
+
     let balance node =
       let diff = nodeHeightDiff node
       match diff with
-      | -2 when (treeHeightDiff node.left) < (treeHeightDiff node.right) -> rr node
-      | -2 when (treeHeightDiff node.left) > (treeHeightDiff node.right) -> failwith "todo" // ll + rr
+      | -2 when (treeHeightDiff node.right) = -1 -> rr node
+      | -2 when (treeHeightDiff node.right) = 1 -> rl node
       | -2 -> failwith "unexpected case"
-      | 2 when (treeHeightDiff node.left) > (treeHeightDiff node.right) -> ll node
-      | 2 when (treeHeightDiff node.left) > (treeHeightDiff node.right) -> failwith "todo" // rr + ll ???
+      | 2 when (treeHeightDiff node.left) = 1 -> ll node
+      | 2 when (treeHeightDiff node.left) = -1 -> lr node
       | 2 -> failwith "unexpected case"
-      | _ -> ll node
+      | diff when (abs diff) > 2 -> failwith "unexpected case"
+      | _ -> node
 
     let rec insertInternal tree value =
       match tree with
@@ -181,6 +200,49 @@ module Tests =
       left = Node { leaf with value = 2 }
       right = Node {leaf with value = 10}
       height = 1
+    }
+    tree |> should equal expectedTree
+
+  [<Test>]
+  let ``rr check`` () =
+    let tree = fillTree [| 10; 15; 20 |]
+    let expectedTree = Node {
+      value = 15
+      left = Node { leaf with value = 10 }
+      right = Node {leaf with value = 20}
+      height = 1
+    }
+    tree |> should equal expectedTree
+
+  [<Test>]
+  let ``rl check`` () =
+    let tree = fillTree [| 10; 5; 16; 20; 15; 14 |]
+    let expectedTree = Node {
+      value = 15
+      left = Node {
+        value = 10
+        left = Node { leaf with value = 5 }
+        right = Node { leaf with value = 14 }
+        height = 1
+      }
+      right = Node { leaf with value = 16; right = Node { leaf with value = 20 }; height = 1 }
+      height = 2
+    }
+    tree |> should equal expectedTree
+
+  [<Test>]
+  let ``lr check`` () =
+    let tree = fillTree [| 10; 16; 5; 6; 4; 7 |]
+    let expectedTree = Node {
+      value = 6
+      left = Node { leaf with value = 5; left = Node { leaf with value = 4 }; height = 1 }
+      right = Node {
+        value = 10
+        left = Node { leaf with value = 7 }
+        right = Node { leaf with value = 16 }
+        height = 1
+      }
+      height = 2
     }
     tree |> should equal expectedTree
 
