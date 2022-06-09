@@ -30,72 +30,72 @@ module Implementation =
 
     isBstInternal tree None None
 
+  let height node =
+    match node with
+    | Empty -> -1
+    | Node node -> node.height
+
+  let nodeHeightDiff node =
+    (height node.left) - (height node.right)
+
+  let treeHeightDiff tree =
+    match tree with
+    | Empty -> 0
+    | Node node -> nodeHeightDiff node
+
+  let ll node =
+    let y =
+      match node.left with
+      | Node node -> node
+      | Empty -> raise InvalidCaseException
+    let a = y.left
+    let b = y.right
+    let c = node.right
+    let x = Node { node with left = b; right = c; height = 1 + max (height b) (height c) }
+    { y with left = a; right = x; height = 1 + max (height a) (height x) }
+
+  let rr node =
+    let y =
+      match node.right with
+      | Node node -> node
+      | Empty -> raise InvalidCaseException
+    let a = node.left
+    let b = y.left
+    let c = y.right
+    let x = Node { node with left = a; right = b; height = 1 + max (height a) (height b) }
+    { y with left = x; right = c; height = 1 + max (height x) (height c) }
+
+  let rl node =
+    let y =
+      match node.right with
+      | Node node -> node
+      | Empty -> raise InvalidCaseException
+    let y = ll y
+    let node = { node with right = Node y }
+    rr node
+
+  let lr node: Node<'a> =
+    let y =
+      match node.left with
+      | Node node -> node
+      | Empty -> raise InvalidCaseException
+    let y = rr y
+    let node = { node with left = Node y }
+    ll node
+
+  let balance node =
+    let diff = nodeHeightDiff node
+    match diff with
+    | -2 when (treeHeightDiff node.right) = -1 -> rr node
+    | -2 when (treeHeightDiff node.right) = 1 -> rl node
+    | -2 -> raise InvalidCaseException
+    | 2 when (treeHeightDiff node.left) = 1 -> ll node
+    | 2 when (treeHeightDiff node.left) = -1 -> lr node
+    | 2 -> raise InvalidCaseException
+    | diff when (abs diff) > 2 -> raise InvalidCaseException
+    | _ -> node
+
   let insert value tree =
-
-    let height node =
-      match node with
-      | Empty -> -1
-      | Node node -> node.height
-
-    let nodeHeightDiff node =
-      (height node.left) - (height node.right)
-
-    let treeHeightDiff tree =
-      match tree with
-      | Empty -> 0
-      | Node node -> nodeHeightDiff node
-
-    let ll node =
-      let y =
-        match node.left with
-        | Node node -> node
-        | Empty -> raise InvalidCaseException
-      let a = y.left
-      let b = y.right
-      let c = node.right
-      let x = Node { node with left = b; right = c; height = 1 + max (height b) (height c) }
-      { y with left = a; right = x; height = 1 + max (height a) (height x) }
-
-    let rr node =
-      let y =
-        match node.right with
-        | Node node -> node
-        | Empty -> raise InvalidCaseException
-      let a = node.left
-      let b = y.left
-      let c = y.right
-      let x = Node { node with left = a; right = b; height = 1 + max (height a) (height b) }
-      { y with left = x; right = c; height = 1 + max (height x) (height c) }
-
-    let rl node =
-      let y =
-        match node.right with
-        | Node node -> node
-        | Empty -> raise InvalidCaseException
-      let y = ll y
-      let node = { node with right = Node y }
-      rr node
-
-    let lr node: Node<'a> =
-      let y =
-        match node.left with
-        | Node node -> node
-        | Empty -> raise InvalidCaseException
-      let y = rr y
-      let node = { node with left = Node y }
-      ll node
-
-    let balance node =
-      let diff = nodeHeightDiff node
-      match diff with
-      | -2 when (treeHeightDiff node.right) = -1 -> rr node
-      | -2 when (treeHeightDiff node.right) = 1 -> rl node
-      | -2 -> raise InvalidCaseException
-      | 2 when (treeHeightDiff node.left) = 1 -> ll node
-      | 2 when (treeHeightDiff node.left) = -1 -> lr node
-      | 2 -> raise InvalidCaseException
-      | diff when (abs diff) > 2 -> raise InvalidCaseException
-      | _ -> node
 
     let rec insertInternal tree value =
       match tree with
@@ -121,11 +121,26 @@ module Implementation =
      | node when value > node.value -> find value node.right
      | _ -> Node node
 
-  let remove value tree =
-    let nodeToRemove = find value tree
-    match nodeToRemove with
-    | Empty -> tree
-    | Node node -> Node node
+  let rec remove value tree =
+   // returns balanced subtree
+   let removeThis node =
+     match node.left, node.right with
+     | Node left, Empty -> Node left
+     | Empty, Node right -> Node right
+     | Empty, Empty -> Empty
+     | Node left, Node right -> Node node
+
+   match tree with
+   | Empty -> Empty
+   | Node node ->
+     match node with
+     | node when value < node.value ->
+       let left = remove value node.left
+       Node (balance { node with left = left })
+     | node when value > node.value ->
+       let right = remove value node.right
+       Node (balance { node with right = right })
+     | node -> removeThis node
 
 module Tests =
 
@@ -271,7 +286,7 @@ module Tests =
     let tree = find 4 tree
     Assert.Multiple (fun () ->
       tree |> should be (ofCase<@ Tree<int>.Node @>)
-      tree |> getInnerValue :?> Node<int> |> fun node -> node.value |> should equal 4)
+      tree |> getInnerValue<Node<int>> |> fun node -> node.value |> should equal 4)
 
   [<Test>]
   let ``node not found if value does not exist`` () =
