@@ -122,13 +122,22 @@ module Implementation =
      | _ -> Node node
 
   let rec remove value tree =
+
+   let rec findMin node =
+     match node.left with
+     | Empty -> node
+     | Node node -> findMin node
+
    // returns balanced subtree
    let removeThis node =
      match node.left, node.right with
      | Node left, Empty -> Node left
      | Empty, Node right -> Node right
      | Empty, Empty -> Empty
-     | Node left, Node right -> Node node
+     | Node _, Node right ->
+       let nodeToReplace = findMin right
+       let rightAfterRemove = remove nodeToReplace.value (Node right)
+       Node (balance { node with value = nodeToReplace.value; right = rightAfterRemove })
 
    match tree with
    | Empty -> Empty
@@ -149,6 +158,43 @@ module Tests =
   open Common
   open Tests.Common
   open Implementation
+
+  module SimpleTreeBuilder =
+
+    let build values =
+      let rec insert value tree =
+        match tree with
+        | Empty -> Node { value = value; left = Empty; right = Empty; height = 0 }
+        | Node node ->
+            match node with
+            | node when value < node.value ->
+              let left = insert value node.left
+              Node { node with left = left }
+            | node when value > node.value ->
+              let right = insert value node.right
+              Node { node with right = right }
+            | _ -> raise (InvalidCaseExceptionWithMessage $"unexpected value = {value}")
+
+      let fillTree values =
+        Array.fold (fun tree value -> insert value tree) Empty values
+
+      let rec calcHeights node =
+        match node.left, node.right with
+        | Empty, Empty -> node
+        | Node _, Empty | Empty, Node _ -> { node with height = 1 }
+        | Node left, Node right ->
+          let left = calcHeights left
+          let right = calcHeights right
+          let height = 1 + max left.height right.height
+          { node with left = Node left; right = Node right; height = height }
+
+      let tree = fillTree values
+      if isBst tree then
+        match tree with
+        | Empty -> failwith "unable build empty tree"
+        | Node node -> Node (calcHeights node)
+      else
+        failwith "the tree is not bst"
 
   let leaf = {
     value = 0
@@ -291,8 +337,15 @@ module Tests =
   [<Test>]
   let ``node not found if value does not exist`` () =
     let tree = fillTree [| 10; 5; 15; 4; 6; 14; 16 |]
-    let tree2 = find 42 tree
-    tree2 |> should be (ofCase<@ Tree<int>.Empty @>)
+    let tree = find 42 tree
+    tree |> should be (ofCase<@ Tree<int>.Empty @>)
+
+  [<Test>]
+  let ``remove root works as expected`` () =
+    let tree = fillTree [| 15; 10; 20; 5; 14; 25 |]
+    let tree = remove 15 tree
+    let expectedTree = SimpleTreeBuilder.build [| 20; 10; 25; 5; 14 |]
+    tree |> should equal expectedTree
 
   [<Test>]
   let ``how immutability works`` () =
