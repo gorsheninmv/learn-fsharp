@@ -12,6 +12,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Tests.Common", "Tests.Commo
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Common", "Common\Common.fsproj", "{46D0CCD9-7CA9-4948-81B3-BE5C89585DD7}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "NumericAlgorithms", "NumericAlgorithms\NumericAlgorithms.fsproj", "{E7E894C8-7CAB-4E76-9142-E962886BC011}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +44,9 @@ Global
 		{46D0CCD9-7CA9-4948-81B3-BE5C89585DD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{46D0CCD9-7CA9-4948-81B3-BE5C89585DD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{46D0CCD9-7CA9-4948-81B3-BE5C89585DD7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7E894C8-7CAB-4E76-9142-E962886BC011}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7E894C8-7CAB-4E76-9142-E962886BC011}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7E894C8-7CAB-4E76-9142-E962886BC011}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7E894C8-7CAB-4E76-9142-E962886BC011}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

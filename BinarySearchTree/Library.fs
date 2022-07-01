@@ -221,27 +221,31 @@ module Tests =
 
   [<Test>]
   let ``isBst returns false when tree is not bst`` () =
-    let tree = Node { leaf with
-      value = 20
-      left = Node { leaf with value = 10 }
-      right = Node { leaf with
-        value = 30
-        left = Node { leaf with value = 5 }
-        right = Node { leaf with value = 40 }
-      }
+    let tree = Node {
+      leaf with
+        value = 20
+        left = Node { leaf with value = 10 }
+        right = Node {
+          leaf with
+            value = 30
+            left = Node { leaf with value = 5 }
+            right = Node { leaf with value = 40 }
+        }
     }
     tree |> isBst |> should equal false
 
   [<Test>]
   let ``isBst returns true when tree is bst`` () =
-    let tree = Node { leaf with
-      value = 20
-      left = Node { leaf with value = 10 }
-      right = Node { leaf with
-        value=30
-        left = Node { leaf with value = 25 }
-        right = Node { leaf with value = 40 }
-      }
+    let tree = Node {
+      leaf with
+        value = 20
+        left = Node { leaf with value = 10 }
+        right = Node {
+          leaf with
+            value=30
+            left = Node { leaf with value = 25 }
+            right = Node { leaf with value = 40 }
+        }
     }
     tree |> isBst |> should equal true
 
@@ -275,55 +279,25 @@ module Tests =
   [<Test>]
   let ``ll check`` () =
     let tree = fillTree [| 10; 5; 2 |]
-    let expectedTree = Node {
-      value = 5
-      left = Node { leaf with value = 2 }
-      right = Node {leaf with value = 10}
-      height = 1
-    }
+    let expectedTree = SimpleTreeBuilder.build [| 5; 2; 10 |]
     tree |> should equal expectedTree
 
   [<Test>]
   let ``rr check`` () =
     let tree = fillTree [| 10; 15; 20 |]
-    let expectedTree = Node {
-      value = 15
-      left = Node { leaf with value = 10 }
-      right = Node {leaf with value = 20}
-      height = 1
-    }
+    let expectedTree = SimpleTreeBuilder.build [| 15; 10; 20 |]
     tree |> should equal expectedTree
 
   [<Test>]
   let ``rl check`` () =
     let tree = fillTree [| 10; 5; 16; 20; 15; 14 |]
-    let expectedTree = Node {
-      value = 15
-      left = Node {
-        value = 10
-        left = Node { leaf with value = 5 }
-        right = Node { leaf with value = 14 }
-        height = 1
-      }
-      right = Node { leaf with value = 16; right = Node { leaf with value = 20 }; height = 1 }
-      height = 2
-    }
+    let expectedTree = SimpleTreeBuilder.build [| 15; 10; 16; 5; 14; 20 |]
     tree |> should equal expectedTree
 
   [<Test>]
   let ``lr check`` () =
     let tree = fillTree [| 10; 16; 5; 6; 4; 7 |]
-    let expectedTree = Node {
-      value = 6
-      left = Node { leaf with value = 5; left = Node { leaf with value = 4 }; height = 1 }
-      right = Node {
-        value = 10
-        left = Node { leaf with value = 7 }
-        right = Node { leaf with value = 16 }
-        height = 1
-      }
-      height = 2
-    }
+    let expectedTree = SimpleTreeBuilder.build [| 6; 5; 10; 4; 7; 16 |]
     tree |> should equal expectedTree
 
   [<Test>]
@@ -332,7 +306,8 @@ module Tests =
     let tree = find 4 tree
     Assert.Multiple (fun () ->
       tree |> should be (ofCase<@ Tree<int>.Node @>)
-      tree |> getInnerValue<Node<int>> |> fun node -> node.value |> should equal 4)
+      tree |> getInnerValue<Node<int>, Tree<int>> |> fun node -> node.value |> should equal 4
+      )
 
   [<Test>]
   let ``node not found if value does not exist`` () =
